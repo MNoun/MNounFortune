@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"strings"
 )
 
@@ -18,6 +19,9 @@ func main() {
 	message := make(chan string)
 	fmt.Println("Your fortune is: ")
 	go fortune(message)
+	{
+		message <- "true"
+	}
 
 	//for loop until user responds no
 	for true {
@@ -28,6 +32,9 @@ func main() {
 		//if yes, send another fortune
 		if response == "yes" {
 			go fortune(message)
+			{
+				message <- "true"
+			}
 		}
 		//if no, break out of loop
 		if response == "no" {
@@ -40,9 +47,18 @@ func main() {
 
 func fortune(message chan string) {
 	//open and read fortunes.txt
-	content, err := ioutil.ReadFile(Fortunes.txt)
+	content, err := ioutil.ReadFile("Fortunes.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 	//split the contents of file
+	contentSlice := strings.Split(string(content), "%%")
+	msg := <-message
+	//for message channel
+	for msg == "true" {
+		n := len(contentSlice)
+		r := rand.Intn(n) //picking a random fortune
+		println(contentSlice[r])
+		break
+	}
 }
